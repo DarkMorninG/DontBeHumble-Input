@@ -5,6 +5,7 @@
     "author": { "name": "DarkMorninG" },
     "git-dependencies": [
       "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-      "https://github.com/DarkMorninG/DontBeHumble.git"
+      "https://github.com/DarkMorninG/DontBeHumble.git",
+      "https://github.com/DarkMorninG/DontBeHumble-Input-Api.git"
    ]
 }
