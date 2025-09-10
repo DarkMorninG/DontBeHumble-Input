@@ -1,0 +1,10 @@
+{
+    "name": "de.dontknow.dontbehumble.input",
+    "version": "1.0.0",
+    "displayName": "Dont Be Humble - Input",
+    "author": { "name": "DarkMorninG" },
+    "git-dependencies": [
+      "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "https://github.com/DarkMorninG/DontBeHumble.git"
+   ]
+}

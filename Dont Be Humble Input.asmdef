@@ -1,0 +1,21 @@
+{
+    "name": "DontBeHumble.Input",
+    "rootNamespace": "DBH.Input",
+    "references": [
+        "GUID:dcc8bc53dd4945e1b7af1af5066d71cf",
+        "GUID:c152e988d447c8a44b8541cd59723bf8",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:01be085f1785be64892bde2cfc93397d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Sirenix.OdinInspector.Attributes.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
