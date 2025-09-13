@@ -61,7 +61,7 @@ namespace DBH.Input.Controller {
                 .ForEach(system => system.Enabled = true);
             var inputDirectionNames = inputDirectionMap.Where(keys => keys.Group.Equals(group))
                 .Select(keys => keys.Name)
-                .ToString();
+                .ToList();
             directionInputSystems.Where(system => inputDirectionNames.Contains(system.MappedName()))
                 .ForEach(system => system.Enabled = true);
         }
