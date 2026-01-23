@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterCoroutine.AwaitRuntime;
 using DBH.Attributes;
 using DBH.Base;
 using DBH.Input.api.Extending;
@@ -68,21 +69,21 @@ namespace DBH.Input.Controller {
 
 
         private void Update() {
-            inputButtonMap
+            IAwaitRuntime.MoveToBackground(() => inputButtonMap
                 .Where(keys => keys.Input.Any(UnityEngine.Input.GetKeyDown))
                 .Select(keys => buttonInputSystems.FindOptional(system => system.MappedName().Equals(keys.Name)))
                 .Where(systems => systems.IsPresent())
                 .Select(systems => systems.Get())
                 .Where(system => system.Enabled)
-                .ForEach(system => system.KeyPressed());
+                .ForEach(system => system.KeyPressed()));
 
-            inputButtonMap
+            IAwaitRuntime.MoveToBackground(() => inputButtonMap
                 .Where(keys => keys.Input.Any(UnityEngine.Input.GetKeyUp))
                 .Select(keys => buttonInputSystems.FindOptional(system => system.MappedName().Equals(keys.Name)))
                 .Where(systems => systems.IsPresent())
                 .Select(systems => systems.Get())
                 .Where(system => system.Enabled)
-                .ForEach(system => system.KeyReleased());
+                .ForEach(system => system.KeyReleased()));
         }
 
         private void FixedUpdate() {
