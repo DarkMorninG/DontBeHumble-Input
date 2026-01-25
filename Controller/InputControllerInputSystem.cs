@@ -15,12 +15,7 @@ namespace DBH.Input.Controller {
         public void EnableGroup(string group) {
             InputSystem.actions.FindActionMap(group).actions.ForEach(action => action.Enable());
         }
-
-        [ContextMenu("Enable")]
-        public void Enable() {
-            EnableGroup("Player");
-        }
-
+        
         public void AddButton(InputKeys keys) {
             throw new System.NotImplementedException();
         }

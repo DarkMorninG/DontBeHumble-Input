@@ -5,6 +5,7 @@ using DBH.Base;
 using DBH.Input.api.Extending;
 using DBH.Input.api.Keys;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Vault;
 
 namespace DBH.Input.Controller {
@@ -40,6 +41,7 @@ namespace DBH.Input.Controller {
 
 
         public void DisableGroup(string group) {
+            InputSystem.actions.FindActionMap(group).actions.ForEach(action => action.Disable());
             var disableButtonName = inputButtonMap.Where(keys => keys.Group.Equals(group))
                 .Select(keys => keys.Name)
                 .ToList();
@@ -53,6 +55,7 @@ namespace DBH.Input.Controller {
         }
 
         public void EnableGroup(string group) {
+            InputSystem.actions.FindActionMap(group).actions.ForEach(action => action.Enable());
             var disableButtonName = inputButtonMap.Where(keys => keys.Group.Equals(group))
                 .Select(keys => keys.Name)
                 .ToList();
