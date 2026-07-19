@@ -12,13 +12,10 @@ namespace DBH.Input.Controller {
     [Attributes.Controller]
     public class InputControllerInputSystem : DBHMono, IInputController {
         [Grab]
-        private List<AbstractButtonInputSystem> buttonInputSystems;
-        [Grab]
-        private List<AbstractValueInputSystem<Vector2>> directionInputSystem;
+        private List<IIDisposableInputSystem> inputSystems;
 
         private void OnDestroy() {
-            buttonInputSystems.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
-            directionInputSystem.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
+            inputSystems.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
         }
 
         public void DisableGroup(string group) {
