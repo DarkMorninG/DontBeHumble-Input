@@ -4,6 +4,7 @@ using DBH.Attributes;
 using DBH.Base;
 using DBH.Input.api.Extending;
 using DBH.Input.api.Keys;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using Vault;
 
@@ -12,9 +13,12 @@ namespace DBH.Input.Controller {
     public class InputControllerInputSystem : DBHMono, IInputController {
         [Grab]
         private List<AbstractButtonInputSystem> buttonInputSystems;
+        [Grab]
+        private List<AbstractValueInputSystem<Vector2>> directionInputSystem;
 
         private void OnDestroy() {
             buttonInputSystems.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
+            directionInputSystem.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
         }
 
         public void DisableGroup(string group) {
