@@ -59,13 +59,13 @@ namespace DBH.Input.Controller {
             }
         }
 
-        public string IconToInput(AbstractButtonInputSystem buttonInputSystem) {
+        public List<string> IconToInput(AbstractButtonInputSystem buttonInputSystem) {
             return inputSpriteMap.SpriteLayout
                 .Find(layout => layout.InputPath.Equals(buttonInputSystem.Path))
                 .SpriteToSchemata
                 .Where(schema => schema.InputSchema == currentSchema)
                 .Select(schema => schema.Sprite.name)
-                .Aggregate((s, s1) => s + "+" + s1);
+                .ToList();
         }
 
 
