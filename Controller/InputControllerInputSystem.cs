@@ -45,45 +45,6 @@ namespace DBH.Input.Controller {
             buttonPressSubscription = null;
         }
 
-        private void OnAnyButtonPressed(InputControl button) {
-            var device = button.device;
-            var nextScheme = ConvertToScheme(device);
-            if (nextScheme == currentSchema) return;
-            currentSchema = nextScheme;
-            OnSchemaChange?.Invoke(currentSchema);
-        }
-
-
-        private void OnDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange) {
-            var foundInputScheme = InputControlScheme.FindControlSchemeForDevice(inputDevice, InputSystem.actions.controlSchemes);
-            currentSchema = ConvertToScheme(foundInputScheme);
-        }
-
-
-        private static InputSchema ConvertToScheme(InputControlScheme? foundInputScheme) {
-            if (foundInputScheme != null) {
-                return foundInputScheme.Value.name switch {
-                    "Keyboard&Mouse" => InputSchema.KeyboardAndMouse,
-                    "Gamepad" => InputSchema.Gamepad,
-                    "Touch" => InputSchema.Touch,
-                    "Joystick" => InputSchema.Joystick,
-                    "XR" => InputSchema.XR,
-                    _ => InputSchema.Unknown
-                };
-            }
-
-            return InputSchema.Unknown;
-        }
-
-
-        private static InputSchema ConvertToScheme(InputDevice inputDevice) {
-            return inputDevice switch {
-                Keyboard or Mouse => InputSchema.KeyboardAndMouse,
-                Gamepad => InputSchema.Gamepad,
-                Joystick => InputSchema.Joystick,
-                _ => InputSchema.Unknown
-            };
-        }
 
         public override void OnStart() {
             foreach (var groupStatus in groupStatuses) {
@@ -98,13 +59,9 @@ namespace DBH.Input.Controller {
             }
         }
 
-        private void OnDestroy() {
-            inputSystems.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
-        }
-
         public string IconToInput(AbstractButtonInputSystem buttonInputSystem) {
             return inputSpriteMap.SpriteLayout
-                .Find(layout => layout.InputPath.Equals(buttonInputSystem.InputAction.name))
+                .Find(layout => layout.InputPath.Equals(buttonInputSystem.Path))
                 .SpriteToSchemata
                 .Where(schema => schema.InputSchema == currentSchema)
                 .Select(schema => schema.Sprite.name)
@@ -126,6 +83,47 @@ namespace DBH.Input.Controller {
 
         public void AddButton(DirectionKeys keys) {
             throw new NotImplementedException();
+        }
+
+        private static InputSchema ConvertToScheme(InputControlScheme? foundInputScheme) {
+            if (foundInputScheme != null) {
+                return foundInputScheme.Value.name switch {
+                    "Keyboard&Mouse" => InputSchema.KeyboardAndMouse,
+                    "Gamepad" => InputSchema.Gamepad,
+                    "Touch" => InputSchema.Touch,
+                    "Joystick" => InputSchema.Joystick,
+                    "XR" => InputSchema.XR,
+                    _ => InputSchema.Unknown
+                };
+            }
+
+            return InputSchema.Unknown;
+        }
+
+        private static InputSchema ConvertToScheme(InputDevice inputDevice) {
+            return inputDevice switch {
+                Keyboard or Mouse => InputSchema.KeyboardAndMouse,
+                Gamepad => InputSchema.Gamepad,
+                Joystick => InputSchema.Joystick,
+                _ => InputSchema.Unknown
+            };
+        }
+
+        private void OnDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange) {
+            var foundInputScheme = InputControlScheme.FindControlSchemeForDevice(inputDevice, InputSystem.actions.controlSchemes);
+            currentSchema = ConvertToScheme(foundInputScheme);
+        }
+
+        private void OnAnyButtonPressed(InputControl button) {
+            var device = button.device;
+            var nextScheme = ConvertToScheme(device);
+            if (nextScheme == currentSchema) return;
+            currentSchema = nextScheme;
+            OnSchemaChange?.Invoke(currentSchema);
+        }
+
+        private void OnDestroy() {
+            inputSystems.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
         }
 
         private void OnValidate() {
