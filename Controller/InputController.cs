@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 using Vault;
 
 namespace DBH.Input.Controller {
-    [Attributes.Controller]
+    [DBH.Attributes.Controller]
     public class InputController : DBHMono, IInputController {
         [Grab]
         private List<IButtonInputSystem> buttonInputSystems;
@@ -41,6 +41,7 @@ namespace DBH.Input.Controller {
 
 
         public void DisableGroup(string group) {
+            
             InputSystem.actions.FindActionMap(group).actions.ForEach(action => action.Disable());
             var disableButtonName = inputButtonMap.Where(keys => keys.Group.Equals(group))
                 .Select(keys => keys.Name)

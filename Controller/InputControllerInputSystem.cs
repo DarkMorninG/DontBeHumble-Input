@@ -5,18 +5,85 @@ using DBH.Attributes;
 using DBH.Base;
 using DBH.Input.api.Extending;
 using DBH.Input.api.Keys;
+using DBH.Input.Dtos;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 using Vault;
 
 namespace DBH.Input.Controller {
-    [Attributes.Controller]
+    [DBH.Attributes.Controller]
     public class InputControllerInputSystem : DBHMono, IInputController {
         [Grab]
         private List<IIDisposableInputSystem> inputSystems;
 
         [SerializeField]
+        private InputSpriteMap inputSpriteMap;
+
+        [SerializeField]
         private List<GroupStatus> groupStatuses;
+
+        public delegate void SchemaChange(InputSchema inputSchema);
+
+        public event SchemaChange OnSchemaChange;
+
+        private InputSchema currentSchema = InputSchema.Unknown;
+
+        public InputSchema CurrentSchema => currentSchema;
+        private IDisposable buttonPressSubscription;
+
+
+        private void OnEnable() {
+            InputSystem.onDeviceChange += OnDeviceChange;
+            buttonPressSubscription =
+                InputSystem.onAnyButtonPress.Call(OnAnyButtonPressed);
+        }
+
+        private void OnDisable() {
+            InputSystem.onDeviceChange -= OnDeviceChange;
+            buttonPressSubscription?.Dispose();
+            buttonPressSubscription = null;
+        }
+
+        private void OnAnyButtonPressed(InputControl button) {
+            var device = button.device;
+            var nextScheme = ConvertToScheme(device);
+            if (nextScheme == currentSchema) return;
+            currentSchema = nextScheme;
+            OnSchemaChange?.Invoke(currentSchema);
+        }
+
+
+        private void OnDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange) {
+            var foundInputScheme = InputControlScheme.FindControlSchemeForDevice(inputDevice, InputSystem.actions.controlSchemes);
+            currentSchema = ConvertToScheme(foundInputScheme);
+        }
+
+
+        private static InputSchema ConvertToScheme(InputControlScheme? foundInputScheme) {
+            if (foundInputScheme != null) {
+                return foundInputScheme.Value.name switch {
+                    "Keyboard&Mouse" => InputSchema.KeyboardAndMouse,
+                    "Gamepad" => InputSchema.Gamepad,
+                    "Touch" => InputSchema.Touch,
+                    "Joystick" => InputSchema.Joystick,
+                    "XR" => InputSchema.XR,
+                    _ => InputSchema.Unknown
+                };
+            }
+
+            return InputSchema.Unknown;
+        }
+
+
+        private static InputSchema ConvertToScheme(InputDevice inputDevice) {
+            return inputDevice switch {
+                Keyboard or Mouse => InputSchema.KeyboardAndMouse,
+                Gamepad => InputSchema.Gamepad,
+                Joystick => InputSchema.Joystick,
+                _ => InputSchema.Unknown
+            };
+        }
 
         public override void OnStart() {
             foreach (var groupStatus in groupStatuses) {
@@ -34,6 +101,16 @@ namespace DBH.Input.Controller {
         private void OnDestroy() {
             inputSystems.ForEach(buttonInputSystem => buttonInputSystem.Deconstruct());
         }
+
+        public string IconToInput(AbstractButtonInputSystem buttonInputSystem) {
+            return inputSpriteMap.SpriteLayout
+                .Find(layout => layout.InputPath.Equals(buttonInputSystem.InputAction.name))
+                .SpriteToSchemata
+                .Where(schema => schema.InputSchema == currentSchema)
+                .Select(schema => schema.Sprite.name)
+                .Aggregate((s, s1) => s + "+" + s1);
+        }
+
 
         public void DisableGroup(string group) {
             InputSystem.actions.FindActionMap(group).actions.ForEach(action => action.Disable());
