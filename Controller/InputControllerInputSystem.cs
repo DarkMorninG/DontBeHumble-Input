@@ -6,6 +6,7 @@ using DBH.Base;
 using DBH.Input.api.Extending;
 using DBH.Input.api.Keys;
 using DBH.Input.Dtos;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
@@ -23,11 +24,13 @@ namespace DBH.Input.Controller {
         [SerializeField]
         private List<GroupStatus> groupStatuses;
 
+        [ReadOnly]
+        [SerializeField]
+        private InputSchema currentSchema;
+
         public delegate void SchemaChange(InputSchema inputSchema);
 
         public event SchemaChange OnSchemaChange;
-
-        private InputSchema currentSchema;
 
         public InputSchema CurrentSchema => currentSchema;
         private IDisposable buttonPressSubscription;
