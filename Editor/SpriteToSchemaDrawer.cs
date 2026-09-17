@@ -11,7 +11,13 @@ namespace DBH.Input.Editor {
     public sealed class SpriteToSchemaDrawer : PropertyDrawer, IDisposable {
         private const int FieldCount = 3;
 
-        private readonly Dictionary<string, InputControlPathEditor> controlEditors = new();
+        private static readonly string[] KeyboardAndMousePaths = { "<Keyboard>", "<Mouse>" };
+        private static readonly string[] GamepadPaths = { "<Gamepad>" };
+        private static readonly string[] TouchPaths = { "<Touchscreen>" };
+        private static readonly string[] JoystickPaths = { "<Joystick>" };
+        private static readonly string[] XrPaths = { "<XRController>" };
+
+        private readonly Dictionary<string, ControlEditorEntry> controlEditors = new();
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             EditorGUI.BeginProperty(position, label, property);
@@ -56,8 +62,8 @@ namespace DBH.Input.Editor {
         }
 
         public void Dispose() {
-            foreach (var controlEditor in controlEditors.Values) {
-                controlEditor.Dispose();
+            foreach (var entry in controlEditors.Values) {
+                entry.Editor.Dispose();
             }
 
             controlEditors.Clear();
@@ -73,32 +79,41 @@ namespace DBH.Input.Editor {
                 return;
             }
 
-            var editor = GetControlEditor(pathProperty, bindingProperty);
-            editor.SetExpectedControlLayout("Button");
-            editor.SetControlPathsToMatch(GetDevicePaths((InputSchema)schemaProperty.enumValueIndex));
-            editor.OnGUI(
+            var schema = (InputSchema)schemaProperty.enumValueIndex;
+            var entry = GetControlEditor(pathProperty, bindingProperty, schema);
+            if (entry.Schema != schema) {
+                entry.Editor.SetControlPathsToMatch(GetDevicePaths(schema));
+                entry.Schema = schema;
+            }
+
+            entry.Editor.OnGUI(
                 position,
                 EditorGUIUtility.TrTextContent("Button"),
                 pathProperty,
                 () => ApplyControlPath(bindingProperty));
         }
 
-        private InputControlPathEditor GetControlEditor(
+        private ControlEditorEntry GetControlEditor(
             SerializedProperty pathProperty,
-            SerializedProperty bindingProperty) {
+            SerializedProperty bindingProperty,
+            InputSchema schema) {
             var targetId = pathProperty.serializedObject.targetObject.GetInstanceID();
             var key = $"{targetId}:{pathProperty.propertyPath}";
-            if (controlEditors.TryGetValue(key, out var editor)) {
-                return editor;
+            if (controlEditors.TryGetValue(key, out var entry)) {
+                return entry;
             }
 
-            editor = new InputControlPathEditor(
+            var editor = new InputControlPathEditor(
                 pathProperty,
                 new InputControlPickerState(),
                 () => ApplyControlPath(bindingProperty),
                 EditorGUIUtility.TrTextContent("Button"));
-            controlEditors.Add(key, editor);
-            return editor;
+            editor.SetExpectedControlLayout("Button");
+            editor.SetControlPathsToMatch(GetDevicePaths(schema));
+
+            entry = new ControlEditorEntry(editor, schema);
+            controlEditors.Add(key, entry);
+            return entry;
         }
 
         private static void ApplyControlPath(SerializedProperty bindingProperty) {
@@ -118,13 +133,23 @@ namespace DBH.Input.Editor {
 
         private static IEnumerable<string> GetDevicePaths(InputSchema inputSchema) {
             return inputSchema switch {
-                InputSchema.KeyboardAndMouse => new[] { "<Keyboard>", "<Mouse>" },
-                InputSchema.Gamepad => new[] { "<Gamepad>" },
-                InputSchema.Touch => new[] { "<Touchscreen>" },
-                InputSchema.Joystick => new[] { "<Joystick>" },
-                InputSchema.XR => new[] { "<XRController>" },
+                InputSchema.KeyboardAndMouse => KeyboardAndMousePaths,
+                InputSchema.Gamepad => GamepadPaths,
+                InputSchema.Touch => TouchPaths,
+                InputSchema.Joystick => JoystickPaths,
+                InputSchema.XR => XrPaths,
                 _ => Array.Empty<string>()
             };
+        }
+
+        private sealed class ControlEditorEntry {
+            public readonly InputControlPathEditor Editor;
+            public InputSchema Schema;
+
+            public ControlEditorEntry(InputControlPathEditor editor, InputSchema schema) {
+                Editor = editor;
+                Schema = schema;
+            }
         }
 
         private static Rect SingleLine(Rect position, int line) {
