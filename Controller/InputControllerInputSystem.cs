@@ -27,7 +27,7 @@ namespace DBH.Input.Controller {
 
         public event SchemaChange OnSchemaChange;
 
-        private InputSchema currentSchema = InputSchema.Unknown;
+        private InputSchema currentSchema;
 
         public InputSchema CurrentSchema => currentSchema;
         private IDisposable buttonPressSubscription;
