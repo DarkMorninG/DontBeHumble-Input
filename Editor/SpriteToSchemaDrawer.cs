@@ -21,16 +21,17 @@ namespace DBH.Input.Editor {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             EditorGUI.BeginProperty(position, label, property);
+            var schemaProperty = property.FindPropertyRelative("inputSchema");
+            var foldoutLabel = GetFoldoutLabel(schemaProperty, label);
 
             property.isExpanded = EditorGUI.Foldout(
                 SingleLine(position, 0),
                 property.isExpanded,
-                label,
+                foldoutLabel,
                 true);
 
             if (property.isExpanded) {
                 using (new EditorGUI.IndentLevelScope()) {
-                    var schemaProperty = property.FindPropertyRelative("inputSchema");
                     var bindingProperty = property.FindPropertyRelative("inputBinding");
                     var spriteProperty = property.FindPropertyRelative("sprite");
 
@@ -50,6 +51,17 @@ namespace DBH.Input.Editor {
             }
 
             EditorGUI.EndProperty();
+        }
+
+        private static GUIContent GetFoldoutLabel(SerializedProperty schemaProperty, GUIContent fallbackLabel) {
+            if (schemaProperty == null || schemaProperty.hasMultipleDifferentValues) {
+                return fallbackLabel;
+            }
+
+            var selectedIndex = schemaProperty.enumValueIndex;
+            return selectedIndex >= 0 && selectedIndex < schemaProperty.enumDisplayNames.Length
+                ? EditorGUIUtility.TrTextContent(schemaProperty.enumDisplayNames[selectedIndex])
+                : fallbackLabel;
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
