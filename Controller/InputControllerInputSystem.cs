@@ -60,10 +60,9 @@ namespace DBH.Input.Controller {
         }
 
         public List<string> IconToInput(AbstractButtonInputSystem buttonInputSystem) {
-            return inputSpriteMap.SpriteLayout
-                .Find(layout => layout.InputPath.Equals(buttonInputSystem.Path))
-                .SpriteToSchemata
-                .Where(schema => schema.InputSchema == currentSchema)
+            return inputSpriteMap.SpriteToSchemata
+                .Where(schema => schema.InputSchema == CurrentSchema)
+                .Where(schema => buttonInputSystem.InputAction.bindings.Contains(schema.InputBinding))
                 .Select(schema => schema.Sprite.name)
                 .ToList();
         }
