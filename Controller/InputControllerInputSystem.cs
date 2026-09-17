@@ -24,8 +24,6 @@ namespace DBH.Input.Controller {
         [SerializeField]
         private List<GroupStatus> groupStatuses;
 
-        [ReadOnly]
-        [SerializeField]
         private InputSchema currentSchema;
 
         public delegate void SchemaChange(InputSchema inputSchema);
@@ -37,13 +35,11 @@ namespace DBH.Input.Controller {
 
 
         private void OnEnable() {
-            InputSystem.onDeviceChange += OnDeviceChange;
             buttonPressSubscription =
                 InputSystem.onAnyButtonPress.Call(OnAnyButtonPressed);
         }
 
         private void OnDisable() {
-            InputSystem.onDeviceChange -= OnDeviceChange;
             buttonPressSubscription?.Dispose();
             buttonPressSubscription = null;
         }
@@ -111,11 +107,6 @@ namespace DBH.Input.Controller {
                 Joystick => InputSchema.Joystick,
                 _ => InputSchema.Unknown
             };
-        }
-
-        private void OnDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange) {
-            var foundInputScheme = InputControlScheme.FindControlSchemeForDevice(inputDevice, InputSystem.actions.controlSchemes);
-            currentSchema = ConvertToScheme(foundInputScheme);
         }
 
         private void OnAnyButtonPressed(InputControl button) {
