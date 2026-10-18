@@ -35,6 +35,7 @@ namespace DBH.Input.Controller {
 
 
         private void OnEnable() {
+            currentSchema = InputSchema.KeyboardAndMouse;
             buttonPressSubscription =
                 InputSystem.onAnyButtonPress.Call(OnAnyButtonPressed);
         }
